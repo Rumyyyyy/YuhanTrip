@@ -1,0 +1,156 @@
+body{font-family: 'NIXGONM-Vb';}
+header nav ul {
+    margin-top: 30px;
+    padding: 0;
+}
+
+header nav ul::after {
+    content: '';
+    display: block;
+    overflow: hidden;
+    clear: both;
+}
+
+header nav ul li {
+    list-style-type: none;
+    float: left;
+    margin-right: 30px;
+    text-align: center;
+    line-height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+header nav ul li h1 {
+    margin: 0;
+}
+
+header nav ul li h1 a img {
+    max-width: 120px;
+    height: auto;
+}
+
+header nav ul li:nth-last-child(3) {
+    float: right;
+}
+
+header nav ul li:nth-last-child(2) {
+    float: right;
+}
+
+header nav ul li:last-child {
+    float: right;
+}
+
+header nav ul li a {
+    color: #606060;
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 20px;
+}
+
+header div{
+    height: 300px;
+    background-image: url("../img/top.jpg");
+    background-position: center;
+    background-size: cover;
+    object-fit: fill;
+    margin-bottom: 35px;
+}
+
+
+/* @media (max-width: 768px) {
+    header nav ul {
+        flex-direction: column;
+    }
+} */
+
+/* ! footer */
+footer{
+    background-color: #e0e0e0;
+    padding-top: 40px;
+    margin-top: 100px;
+    padding-bottom: 50px;
+}
+
+footer div.footer::after{
+    content: '';
+    visibility: hidden;
+    display: block;
+    clear: both;
+}
+footer div.footer{
+    width: 70%;
+    margin: 0 auto;
+}
+
+footer h2 a img{
+    width: 120px;
+    height: 60px;
+}
+
+footer div.footer div{
+    float: left;
+    margin-right: 5%;
+    margin-bottom: 30px;
+}
+footer div.footer div:nth-child(1){
+    width: 25%;
+}
+footer div.footer div:nth-child(2){
+    width: 40%;
+}
+footer div.footer div:nth-child(3){
+    width: 25%;
+    margin: 0;
+    margin-bottom: 30px;
+}
+
+footer div.footer h3{
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+footer div.footer div address{
+    font-size: 16px;
+}
+
+footer div.footer div:nth-child(1) p{
+    line-height: 25px;
+}
+
+footer div.footer div address p {
+    margin-bottom: 10px;
+}
+
+footer div.footer div p{
+    font-size: 16px;
+}
+
+footer div.footer div:nth-child(3) h2{
+    margin-bottom: 30px;
+    text-align: center;
+}
+footer div.footer div:nth-child(3) ul{
+    display: block;
+    margin: 0 auto;
+}
+footer div.footer div:nth-child(3) ul li{
+    display: inline-block;
+    text-align: center;
+    margin-right: 10px;
+}
+footer div.footer div:nth-child(3) ul li a{
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: block;
+    width: 50px;
+    height: 50px;
+}
+footer div.footer div:nth-child(3) ul li:nth-child(1) a{background-image: url(../img/instagram.png);}
+footer div.footer div:nth-child(3) ul li:nth-child(2) a{background-image: url(../img/youtube.png);}
+footer div.footer div:nth-child(3) ul li:nth-child(3) a{background-image: url(../img/facebook.png);}
+footer div.footer div:nth-child(3) ul li:nth-child(4) a{background-image: url(../img/google.png);}
+footer div.footer div:nth-child(3) ul li:nth-child(5) a{background-image: url(../img/twitter.png);}
