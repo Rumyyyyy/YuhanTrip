@@ -1,91 +1,143 @@
 <script>
     import { onMount } from "svelte";
+    import Like from "../../img/like.png";
+    import noLike from "../../img/notLike.png";
+
     let posts = [];
-    let username = "";
+    let myLikedPosts = [];
     let myPosts = [];
+    let username = "";
+    let userId = "";
     let isLoggedIn = false;
-    let userName = "";
+    let currentMyPosts = [];
+    let currentLikedPosts = [];
 
-    // 카카오 SDK 초기화 및 사용자 로그인 여부 확인
+    let currentPagePosts = 1; // 내가 작성한 글 페이지
+    let postsPerPage = 8;
+    let currentPageLiked = 1; // 내가 좋아요를 누른 글 페이지
+    let likedPostsPerPage = 8;
+
+    const API_URL = "http://localhost:3000"; // 서버 URL
+
     onMount(() => {
-        const script = document.createElement("script");
-        script.src = "https://developers.kakao.com/sdk/js/kakao.js";
-        script.onload = () => {
-            Kakao.init('1d28a43f8e4e4915d4c2010b36c8a8c7');
-            console.log(Kakao.isInitialized());
+        const storedUsername = localStorage.getItem("username");
+        const storedUserId = localStorage.getItem("userId");
 
-            if (Kakao.Auth.getAccessToken()) {
-                getUserInfo();  // 사용자 정보 가져오기
-            }
-
-            // 로컬 스토리지에서 포스트 불러오기
-            username = localStorage.getItem("username") || "";
-            let storedPosts = JSON.parse(localStorage.getItem("posts")) || [];
-            posts = storedPosts;
-            myPosts = posts.filter(post => post.username === username);  // 사용자 작성 글만 필터링
-        };
-        document.head.appendChild(script);
+        if (storedUsername && storedUserId) {
+            username = storedUsername;
+            userId = Number(storedUserId); // userId를 숫자로 변환
+            isLoggedIn = true;
+            loadLikedPosts();
+            loadMyPosts();
+        } else {
+            isLoggedIn = false;
+            username = "";
+            userId = "";
+            posts = [];
+            myLikedPosts = [];
+            myPosts = [];
+        }
     });
 
-    // 사용자 정보 가져오기
-    function getUserInfo() {
-        Kakao.API.request({
-            url: '/v2/user/me',
-            success: function (response) {
-                isLoggedIn = true;
-                userName = response.kakao_account.profile.nickname;
-                localStorage.setItem("username", userName);  // 로컬 스토리지에 저장
-            },
-            fail: function (error) {
-                console.error(error);
-            }
-        });
+    // 내가 작성한 글 로드
+    function loadMyPosts() {
+        if (userId) {
+            fetch(`http://localhost:3000/get-posts-by-user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    myPosts = data.filter(post => Number(post.userId) === userId);
+                    paginateMyPosts();  // 내가 작성한 글에 대해 페이지네이션 수행
+                })
+                .catch(err => console.error('Error loading my posts:', err));
+        }
     }
 
-    // 카카오 로그인
+    // 내가 좋아요를 누른 글 로드
+    function loadLikedPosts() {
+        if (userId) {
+            fetch(`http://localhost:3000/liked-posts/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    myLikedPosts = data.filter(post => 
+                        post.likedBy.some(like => Number(like) === Number(userId)) 
+                    );
+                    paginateLikedPosts();  // 내가 좋아요를 누른 글에 대해 페이지네이션 수행
+                })
+                .catch(err => console.error('Error loading liked posts:', err));
+        }
+    }
+
+    // 내가 작성한 글에 대해 페이지네이션
+    function paginateMyPosts() {
+        const startIndex = (currentPagePosts - 1) * postsPerPage;
+        const endIndex = startIndex + postsPerPage;
+        currentMyPosts = myPosts.slice(startIndex, endIndex);
+    }
+
+    // 내가 좋아요를 누른 글에 대해 페이지네이션
+    function paginateLikedPosts() {
+        const startIndex = (currentPageLiked - 1) * likedPostsPerPage;
+        const endIndex = startIndex + likedPostsPerPage;
+        currentLikedPosts = myLikedPosts.slice(startIndex, endIndex);
+    }
+
+    // 페이지 변경
+    function changePagePosts(page) {
+        if (page >= 1 && page <= Math.ceil(myPosts.length / postsPerPage)) {
+            currentPagePosts = page;
+            paginateMyPosts();
+        }
+    }
+
+    function changePageLiked(page) {
+        if (page >= 1 && page <= Math.ceil(myLikedPosts.length / likedPostsPerPage)) {
+            currentPageLiked = page;
+            paginateLikedPosts();
+        }
+    }
+
+    function toggleLike(postId) {
+        fetch(`http://localhost:3000/get-post/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ postId, userId })
+        })
+        .then(response => response.json())
+        .then(updatedPost => {
+            posts = posts.map(post => post.id === updatedPost.id ? updatedPost : post);
+            loadLikedPosts();
+        })
+        .catch(err => console.error('Error toggling like:', err));
+    }
+
     function kakaoLogin() {
         Kakao.Auth.login({
-            success: function (authObj) {
-                console.log(authObj);
-                getUserInfo();  // 로그인 성공 후 사용자 정보 가져오기
+            success: (authObj) => {
+                Kakao.API.request({
+                    url: '/v2/user/me',
+                    success: (res) => {
+                        const nickname = res.properties.nickname;
+                        const userIdFromKakao = res.id;
+                        
+                        localStorage.setItem("username", nickname);
+                        localStorage.setItem("userId", userIdFromKakao);
+                        
+                        username = nickname;
+                        userId = userIdFromKakao;
+                        isLoggedIn = true;
+                        loadLikedPosts();
+                        loadMyPosts();
+                    },
+                    fail: (error) => {
+                        console.error('카카오 사용자 정보 요청 실패:', error);
+                    }
+                });
             },
-            fail: function (err) {
-                console.error(err);
-                alert('로그인 실패');
+            fail: (error) => {
+                console.error('카카오 로그인 실패:', error);
             }
-        });
-    }
-
-    // 글 삭제 기능
-    function deletePost(postId) {
-        let updatedPosts = posts.filter(post => post.id !== postId);
-        localStorage.setItem("posts", JSON.stringify(updatedPosts));
-        myPosts = updatedPosts.filter(post => post.username === username);  // 내 글 리스트 갱신
-    }
-
-    // 좋아요 토글 기능
-    function toggleLike(postId) {
-        let post = posts.find(p => p.id === postId);
-        if (!post.likedBy) post.likedBy = [];
-
-        if (post.likedBy.includes(username)) {
-            post.likes--;
-            post.likedBy = post.likedBy.filter(user => user !== username);
-        } else {
-            post.likes++;
-            post.likedBy.push(username);
-        }
-
-        localStorage.setItem("posts", JSON.stringify(posts));
-        myPosts = posts.filter(post => post.username === username);  // 내 글 리스트 갱신
-    }
-
-    // 카카오 로그아웃
-    function kakaoLogout() {
-        Kakao.Auth.logout(() => {
-            isLoggedIn = false;
-            userName = '';
-            alert('로그아웃 되었습니다.');
         });
     }
 </script>
@@ -93,30 +145,66 @@
 <body>
     <section class="myPage">
         {#if isLoggedIn}
-            <div class="userID"><span class="userID"></span>{userName}님, 환영합니다!</div>
-            {#if myPosts.length > 0}
-                <h2>내가 작성한 글</h2>
+            <div class="userID"><span class="userID"></span>{username}님, 환영합니다!</div>
+
+            <h2>내가 작성한 글</h2>
+            {#if currentMyPosts.length > 0}
+            <div class="uList">
                 <ul>
-                    {#each myPosts as post}
-                        <li>
-                            <a href={`/travelLogDetail/${post.id}`}>
-                                <img src={post.image} alt="여행지 사진">
-                                <p>{post.title}</p>
-                            </a>
-                            <div class="like">
-                                <span>작성자: {post.username}</span>
-                                <span>
-                                    <img src={post.likedBy && post.likedBy.includes(username) ? Like : noLike}
-                                         alt="좋아요" class="like-icon" on:click={() => toggleLike(post.id)}>
-                                </span>
-                                <span>{post.likes} Likes</span>
-                                <button on:click={() => deletePost(post.id)}>삭제</button>
-                            </div>
-                        </li>
+                    {#each currentMyPosts as post}
+                    <li>
+                        <a href={`/travelLogDetail/${post.id}`} sveltekit:prefetch>
+                            <img src={`http://localhost:3000${post.image}`} alt="여행지 사진" />
+                            <p>{post.title}</p>
+                        </a>                    
+                        <div class="like">
+                            <span>작성자: {post.username}</span>
+                            <span>
+                                <img src={post.likedBy && post.likedBy.some(id => Number(id) === userId) ? Like : noLike} 
+                                    alt="좋아요" class="like-icon" on:click={() => toggleLike(post.id)} />
+                            </span>
+                            <span>{post.likes || 0}</span>
+                        </div>
+                    </li>
                     {/each}
                 </ul>
+            </div>
+            <div class="pagination">
+                <button on:click={() => changePagePosts(currentPagePosts - 1)} disabled={currentPagePosts === 1}>이전</button>
+                <button on:click={() => changePagePosts(currentPagePosts + 1)} disabled={currentPagePosts * postsPerPage >= myPosts.length}>다음</button>
+            </div>
             {:else}
                 <p>작성한 글이 없습니다.</p>
+            {/if}
+
+            <h2>내가 좋아요를 누른 글</h2>
+            {#if currentLikedPosts.length > 0}
+            <div class="uList">
+                <ul>
+                    {#each currentLikedPosts as post}
+                    <li>
+                        <a href={`/travelLogDetail/${post.id}`} sveltekit:prefetch>
+                            <img src={`http://localhost:3000${post.image}`} alt="여행지 사진" />
+                            <p>{post.title}</p>
+                        </a>                    
+                        <div class="like">
+                            <span>작성자: {post.username}</span>
+                            <span>
+                                <img src={post.likedBy && post.likedBy.some(id => Number(id) === userId) ? Like : noLike} 
+                                    alt="좋아요" class="like-icon" on:click={() => toggleLike(post.id)} />
+                            </span>
+                            <span>{post.likes || 0}</span>
+                        </div>
+                    </li>
+                    {/each}
+                </ul>
+            </div>
+            <div class="pagination">
+                <button on:click={() => changePageLiked(currentPageLiked - 1)} disabled={currentPageLiked === 1}>이전</button>
+                <button on:click={() => changePageLiked(currentPageLiked + 1)} disabled={currentPageLiked * likedPostsPerPage >= myLikedPosts.length}>다음</button>
+            </div>
+            {:else}
+                <p>좋아요를 누른 글이 없습니다.</p>
             {/if}
         {:else}
             <h2>로그인 후 이용해주세요</h2>
@@ -124,3 +212,23 @@
         {/if}
     </section>
 </body>
+
+<style>
+    .pagination button {
+        margin: 0 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    .pagination button.selected {
+        font-weight: bold;
+    }
+    .uList img {
+        width: 250px;
+        height: 250px;
+        object-fit: cover;
+    }
+    .like-icon {
+        max-width: 24px;
+        max-height: 24px;
+    }
+</style>

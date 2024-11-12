@@ -315,6 +315,7 @@ div.trip a.posting {
     line-height: 30px;
     text-align: center;
     font-size: 15px;
+    cursor: pointer;
 }
 
 div.trip div.uList{
@@ -672,7 +673,6 @@ input[type="radio"]:checked + .question + .answer {
 /* ! div.findRoute */
 div.findRoute {
     display: flex;
-    flex-direction: row;
     height: 100vh;
   }
 
@@ -699,41 +699,70 @@ div.findRoute {
     background-color: #e0e0e0;
   }
 
-  div.route-finding-section {
-    display: flex;
-    width: 40%;
-    height: 100%;
-    background-color: #ffffff;
-    border-left: 1px solid #ddd;
-    position: absolute;
-    left: 100px;
-    z-index: 1000;
-  }
-
-  div.route-finding-section div.area_1,
-  div.route-finding-section div.area_list{
-    width: 50%;
+  div.area_1,
+  div.area_list{
+    width: 20%;
     padding: 10px;
     border-right: 1px solid #ccc;
   }
 
-  div.area_2 {
+  div.area_2, 
+  div.area_3 {
+    position: static;
+    overflow: hidden;
+    border-right: 1px solid #ccc;
+  }
+
+  div.area_2  {
+    width: 15%;
+    height: 100%;
+    background-color: #ffffff;
+    left: 100px;
+    z-index: 1000;
+    padding: 10px;
+  }
+
+  div.area_3 {
     width: 25%;
     height: 100%;
     background-color: #ffffff;
-    position: absolute;
-    padding: 10px;
-    left: 100px;
     z-index: 1000;
+    position: relative;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
   }
 
+  button.toggle-button {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000; /* 다른 요소들 위에 오도록 설정 */
+    position: absolute;  /* 부모 요소 내에서 위치 고정 */
+    left: 20%;
+  }
+
+  .resize-handle {
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    background-color: transparent;
+  }
+  
   #findMap {
     margin: 0;
     height: 100%;
     flex-grow: 1;
   }
-  .findMap {
-    height: 100%;
+
+  div.findmap-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
   
   div.input-group {
@@ -760,6 +789,28 @@ div.findRoute {
     background-color: #33b49a;
   }
 
+  div.place-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 100px;
+    overflow-y: auto;
+    background-color: white;
+  }
+
+  div.place-list li {
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  div.place-list li:hover {
+    background-color: #f0f0f0;
+  }
+
+  div.place-list ::-webkit-scrollbar {
+    width: 10px; /* 스크롤바 너비 */
+  }
+
   div.options {
     width: 100%;
     display: flex;
@@ -778,6 +829,15 @@ div.findRoute {
     margin-bottom: 30px;
   }
   
+  .search-input {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    font-size: 14px;
+    outline: none;
+  }
+
   .search-results {
     list-style-type: none;
     padding: 0;
@@ -881,10 +941,33 @@ div.findRoute {
   background-color: #0079a1;
   color: white;
 }
+.day-areas {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  div.day-area {
+    flex: 1 0 250px;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 500px;
+  }
+
+  div.day-area button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: none;
+    background-color: #e0e0e0;
+    cursor: pointer;
+  }
+
+  div.day-area h3 {
+    margin-top: 0;
+  }
 .day-place-list {
   margin-top: 10px;
-  max-height: 150px;
-  overflow-y: auto;
 }
 .day-place-list ul {
   list-style-type: none;
@@ -944,6 +1027,10 @@ section.travelLogD ul{
     font-size: 18px;
 } 
 
+section.travelLogD li{
+    font-weight: 700;
+}
+
 section.travelLogD div.blogContent{
     width: 70%;
     margin: 0 auto;
@@ -995,10 +1082,50 @@ div.pagination{
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 div.pagination button{
     border: none;
     background-color: #fff;
     cursor: pointer;
+}
+
+/*! .routSaveBtn */
+a.routeSaveBtn{
+    margin: 30px auto 0;
+    display: block;
+    width: 30%;
+}
+
+/*! routeSave*/
+section.routeSave{
+    width: 70%;
+    margin: 0 auto;
+}
+
+section.routeSave h1{
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+section.routeSave h3{
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+section.routeSave button{    
+    display: block;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+section.routeSave div.day-area {
+    max-height: 1500px;
+}
+
+section.routeSave div.road-info {
+    max-height: 1500px;
 }
