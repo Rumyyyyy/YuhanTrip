@@ -7,7 +7,6 @@
   확인 할 수 있어 간편하게 여행 계획을 <br> 
   세울 수 있는 사이트를 만들었습니다.
 </div> 
-
 <div align = "center">
   <h1>🛠 개발 환경</h1>
 </div> 
@@ -22,7 +21,6 @@
   <img src="https://img.shields.io/badge/nodedotjs-5FA04E?style=flat&logo=nodedotjs&logoColor=white"/>
   <img src="https://img.shields.io/badge/json-000000?style=flat&logo=json&logoColor=white"/>
 </div>
-
 <div align = "center">
   <h1>👩‍🎓 참여자</h1>
 
