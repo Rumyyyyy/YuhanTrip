@@ -36,3 +36,7 @@
   [고은별](https://github.com/ooenbbu)
 </div>
 
+<div align = "center">
+  <h1> 🗓️ 개발기간</h1>
+  <b>24.03.06 ~ 24.11.11</b>
+</div>
